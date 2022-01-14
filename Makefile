@@ -26,17 +26,21 @@ $(BUILD_DIR): ## Creates the output directory for all build related outputs
 clean: ## Deletes the build output directory
 	rm -rf $(BUILD_DIR)
 
+.PHONY: helm-clean
+helm-clean: ## Cleans CHART_PACKAGE_DIR
+	rm -rf $(CHART_PACKAGE_DIR)
+
 .PHONY: helm-lint
 helm-lint: ## Lints the Helm chart
 	helm lint $(CHART_DIR)/$(REPO_NAME)
 
 .PHONY: helm-package
-helm-package: helm-lint ## Packages the Previews Helm Chart into BUILD_DIR
+helm-package: helm-clean helm-lint ## Packages the Helm Chart into BUILD_DIR
 	helm dependency build $(CHART_DIR)/$(REPO_NAME)
 	helm package $(CHART_DIR)/$(REPO_NAME) --app-version=${VERSION} --version=${VERSION} --destination $(CHART_PACKAGE_DIR)
 
 .PHONY: helm-index
-helm-index: $(CHART_RELEASER) ## Updates the chart
+helm-index: $(CHART_RELEASER)
 	git checkout gh-pages
 	$(CHART_RELEASER) index -i ./index.yaml -r $(REPO_NAME) -o $(REPO_OWNER) -p $(CHART_PACKAGE_DIR) -c https://hferentschik.github.io/crossplane-secret-sync/ --token $(CR_TOKEN) --release-name-template v$(VERSION)
 	git add index.yaml
@@ -44,9 +48,12 @@ helm-index: $(CHART_RELEASER) ## Updates the chart
 	git push origin gh-pages
 	git checkout master
 
-.PHONY: helm-release
-helm-release: $(CHART_RELEASER) helm-package ## Releases the Previews Helm chart with helm-releaser to
+.PHONY: helm-upload
+helm-upload: $(CHART_RELEASER) helm-package
 	@$(CHART_RELEASER) upload -r $(REPO_NAME) -o $(REPO_OWNER) -p $(CHART_PACKAGE_DIR) --token $(CR_TOKEN) --release-name-template v$(VERSION)
+
+.PHONY: helm-release
+helm-release: $(CHART_RELEASER) helm-upload helm-index  ## Releases the Helm chart with helm-releaser
 
 $(CHART_RELEASER): $(BUILD_DIR) ## Find or download cr if necessary
 	@{ \

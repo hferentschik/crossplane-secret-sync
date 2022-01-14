@@ -1,0 +1,10 @@
+secrets:
+  - name: foo
+    type: Opaque
+    data:
+      - key: foo
+        value: bar
+      - key: snafu
+        value: susfu
+  - name: bar
+    type: kubernetes.io/basic-auth
