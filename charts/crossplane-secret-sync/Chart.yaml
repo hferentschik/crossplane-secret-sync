@@ -1,0 +1,10 @@
+name: crossplane-secret-sync
+apiVersion: v2
+appVersion: 0.0.1
+description: A Helm chart for syncing Crossplane secrets
+home: https://github.com/hferentschik/crossplane-secret-sync
+maintainers:
+  - name: Hardy Ferentschik
+sources:
+  - https://github.com/hferentschik/crossplane-secret-sync
+version: 0.0.1
