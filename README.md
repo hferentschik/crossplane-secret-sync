@@ -7,7 +7,34 @@ See also issue [2772](https://github.com/crossplane/crossplane/issues/2772).
 
 ## Usage
 
-Todo
+```yaml
+apiVersion: helm.crossplane.io/v1beta1
+kind: Release
+metadata:
+  name: my-secret-sync
+spec:
+  forProvider:
+    namespace: default
+    chart:
+      name: crossplane-secret-sync
+      repository: https://hferentschik.github.io/crossplane-secret-sync
+      version: "0.0.3"
+    values:
+      secrets:
+        - name: my-synced-secret
+          type: Opaque
+          data:
+            - key: my-synced-key
+    set:
+      - name: secrets[0].data[0].value
+        valueFrom:
+          secretKeyRef:
+            name: my-local-secret
+            namespace: default
+            key: my-key
+  providerConfigRef:
+    name: coyote-helm-provider-config
+```
 
 ## Testing locally
 
